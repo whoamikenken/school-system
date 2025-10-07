@@ -1,0 +1,108 @@
+version: 1
+title: School System Tech Stack Initialization
+overview: |
+  End-to-end plan for bootstrapping the school system codebase using the agreed
+  technology stack (Vue 3 + Quasar PWA + Pinia + TypeScript on the frontend and
+  Laravel + Laravel Reverb + PostgreSQL + Redis with cache tagging on the backend).
+  Each task captures the outcome, key commands/config changes, and validation steps.
+
+phases:
+  - name: Frontend Foundation
+    goals:
+      - Scaffold a Quasar-based Vue 3 application with TypeScript support.
+      - Enable Quasar's built-in PWA mode and global state management via Pinia.
+    tasks:
+      - id: FE-1
+        description: Scaffold the Quasar project with Vue 3 + TypeScript template.
+        steps:
+          - run: npm create quasar@latest school-system-frontend -- --branch next --typescript
+          - run: cd school-system-frontend && npm install
+        deliverables:
+          - Quasar CLI project configured for Vue 3 and TypeScript.
+        validation:
+          - run: cd school-system-frontend && npm run lint
+          - run: cd school-system-frontend && npm run test:unit
+      - id: FE-2
+        description: Enable Quasar PWA mode and configure service worker settings.
+        steps:
+          - run: cd school-system-frontend && quasar mode add pwa
+          - note: Adjust `quasar.conf.js` to customize Workbox options if needed.
+        deliverables:
+          - Service worker and manifest ready for PWA deployment.
+        validation:
+          - run: cd school-system-frontend && quasar dev -m pwa
+      - id: FE-3
+        description: Install and configure Pinia for global state management.
+        steps:
+          - run: cd school-system-frontend && npm install pinia
+          - note: Register Pinia in the Quasar boot file.
+        deliverables:
+          - `stores/` directory with initial Pinia store scaffolding.
+        validation:
+          - run: cd school-system-frontend && npm run test:unit
+
+  - name: Backend Foundation
+    goals:
+      - Bootstrap a Laravel API backend configured for PostgreSQL.
+      - Integrate Laravel Reverb for WebSocket support and Redis for caching with tagging.
+    tasks:
+      - id: BE-1
+        description: Scaffold the Laravel backend and configure core services.
+        steps:
+          - run: composer create-project laravel/laravel school-system-backend
+          - note: Update `.env` with PostgreSQL connection details.
+          - note: Configure queues/cache sessions to use Redis.
+        deliverables:
+          - Laravel application configured for PostgreSQL and Redis services.
+        validation:
+          - run: cd school-system-backend && php artisan migrate --seed
+      - id: BE-2
+        description: Install and configure Laravel Reverb for real-time features.
+        steps:
+          - run: cd school-system-backend && composer require laravel/reverb
+          - note: Publish Reverb configuration and set up authentication guards.
+          - note: Document channel authorization policies.
+        deliverables:
+          - Reverb server configuration with initial channels defined.
+        validation:
+          - run: cd school-system-backend && php artisan reverb:start --test
+      - id: BE-3
+        description: Enable Redis cache tagging for granular invalidation.
+        steps:
+          - note: Ensure `CACHE_DRIVER=redis` and `REDIS_CLIENT=phpredis` (or predis) in `.env`.
+          - note: Implement tagged cache usage in representative services (e.g., schedule, roster).
+        deliverables:
+          - Example cache service demonstrating tagged cache usage.
+        validation:
+          - run: cd school-system-backend && php artisan test --filter=CacheTagging
+
+  - name: Integration Layer
+    goals:
+      - Establish shared contracts between frontend and backend.
+      - Verify end-to-end flows across REST and WebSocket channels.
+    tasks:
+      - id: INT-1
+        description: Define API contracts and TypeScript types via OpenAPI or TypeSpec.
+        steps:
+          - note: Generate client-side TypeScript typings from the backend schema.
+        deliverables:
+          - Shared API schema and generated client bindings.
+        validation:
+          - run: npm run typecheck (frontend) against generated typings.
+      - id: INT-2
+        description: Connect frontend to Reverb WebSocket channels.
+        steps:
+          - note: Configure Quasar boot file for Reverb/Echo client with auth headers.
+          - note: Create sample real-time feature (e.g., announcements feed).
+        deliverables:
+          - Working real-time subscription demo between frontend and backend.
+        validation:
+          - run: quasar dev (frontend) and php artisan serve (backend) to verify live updates.
+      - id: INT-3
+        description: Document environment setup and developer onboarding.
+        steps:
+          - note: Capture environment variables, service dependencies, and bootstrapping scripts.
+        deliverables:
+          - Updated `README.md` and `docs/tech-stack.md` with setup instructions.
+        validation:
+          - note: Peer review of documentation walkthrough.
