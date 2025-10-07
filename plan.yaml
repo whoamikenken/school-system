@@ -65,7 +65,8 @@ phases:
         deliverables:
           - Reverb server configuration with initial channels defined.
         validation:
-          - run: cd school-system-backend && php artisan reverb:start --test
+          - run: cd school-system-backend && php artisan reverb:start
+          - note: Once the command is running, confirm the server is healthy by checking for the startup log message indicating Reverb is listening (e.g., the host/port line) or by visiting the configured host/port in a WebSocket client.
       - id: BE-3
         description: Enable Redis cache tagging for granular invalidation.
         steps:
